@@ -1,4 +1,4 @@
-// Função para criar e adicionar elementos
+// Funções utilitárias para elementos e datas
 function createEl(tag, options = {}) {
     const el = document.createElement(tag);
     if (options.className) el.className = options.className;
@@ -9,37 +9,44 @@ function createEl(tag, options = {}) {
     if (options.placeholder) el.placeholder = options.placeholder;
     if (options.for) el.htmlFor = options.for;
     if (options.src) el.src = options.src;
+    if (options.max) el.max = options.max;
     return el;
 }
 
-// Inserindo os estilos via JS
 function injectStyles(styleString) {
     const style = document.createElement('style');
     style.textContent = styleString;
     document.head.appendChild(style);
 }
 
+function formatDate(date) {
+    // aaaa-mm-dd
+    return date.toISOString().slice(0, 10);
+}
+function formatDateBR(date) {
+    // dd/mm/aaaa
+    return date.toLocaleDateString('pt-BR');
+}
+
+// ========== CSS ==========
 injectStyles(`
-    * {
-        margin: 0; padding: 0; box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
         font-family: 'Poppins', sans-serif;
         background: linear-gradient(135deg, #6b7280, #a855f7);
-        min-height: 100vh; display: flex; justify-content: center; align-items: center;
+        min-height: 100vh;
+        display: flex; justify-content: center; align-items: center;
         padding: 1rem; overflow-x: hidden;
     }
     .container {
         max-width: 700px; width: 100%;
-        background: rgba(255,255,255,0.95); padding: 2rem; border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.2); position: relative;
-        animation: fadeIn 0.5s ease-in-out;
+        background: rgba(255,255,255,0.95);
+        padding: 2rem; border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        position: relative; animation: fadeIn 0.5s ease-in-out;
     }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px);} to { opacity: 1; transform: translateY(0);} }
-    h1 {
-        font-size: 2rem; color: #1e3a8a; margin-bottom: 1.5rem;
-        text-align:center; font-weight:700;
-    }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);} }
+    h1 { font-size: 2rem; color: #1e3a8a; margin-bottom: 1.0rem; text-align: center; font-weight: 700; }
     .category-container {
         display:flex; flex-direction:column; align-items:center;
         margin-bottom:1.5rem;
@@ -78,6 +85,29 @@ injectStyles(`
     .emoji-label {
         font-size:0.9rem; color:#1e3a8a; margin-top:0.5rem; font-weight:600;
     }
+    .centered {
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        justify-content:center;
+    }
+    .date-today-label, .data-select-label {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #1e3a8a;
+        margin-bottom: 0.3rem;
+        text-align: center;
+    }
+    input[type="date"] {
+        margin-bottom: 1rem;
+        font-size: 1rem;
+        padding: 0.4rem;
+        border-radius: 8px;
+        border: 2px solid #a855f7;
+        outline: none;
+        background: #f1f5f9;
+        box-sizing: border-box;
+    }
     button {
         background: linear-gradient(90deg, #7c3aed, #a855f7);
         color:white; border:none; padding:0.75rem 2rem; font-size:1.1rem;
@@ -89,7 +119,7 @@ injectStyles(`
         box-shadow:0 5px 15px rgba(124,58,237,0.4);
     }
     #totals {
-        font-size:1.1rem; color:#1e3a8a; margin:1.5rem 0; font-weight:600;
+        font-size:1.1rem; color:#1e3a8a; margin:1.0rem 0 1.5rem 0; font-weight:600;
     }
     #chartContainer {
         height:350px; width:100%; margin-top:2rem;
@@ -110,9 +140,22 @@ injectStyles(`
     }
 `);
 
-// Montar a estrutura visual
+// ========== Estrutura visual ==========
 const container = createEl('div', {className: 'container'});
 const h1 = createEl('h1', { innerHTML: 'Como você tá hoje? 😎' });
+
+const today = new Date();
+
+const todayLabel = createEl('div', {
+    className: 'date-today-label',
+    innerHTML: `Data de Hoje: <b id="todayDateBR">${formatDateBR(today)}</b>`
+});
+const dateSelectLabel = createEl('div', {
+    className: 'data-select-label',
+    innerHTML: "Selecionar Dia:"
+});
+const dateInput = createEl('input', {id:"selectDate", type:"date", value: formatDate(today), max: formatDate(today)});
+dateInput.addEventListener('change', onDateSelect);
 
 const catCont = createEl('div', { className: 'category-container' });
 const catLabel = createEl('label', { for: 'category', innerHTML: 'Você é:' });
@@ -143,11 +186,13 @@ EMOJIS.forEach(({val, emoji, label}) => {
     emojisDiv.appendChild(emojiCont);
 });
 
+const btnDiv = createEl('div', {className: 'centered'});
 const btn = createEl('button', { innerHTML: 'Enviar Vibes!'});
 btn.onclick = submitResponse;
+btnDiv.appendChild(btn);
 
-const totalsDiv = createEl('div', { id: 'totals', innerHTML: `
-    Total de Alunos: <span id="totalAlunos">0</span> | Total de Professores: <span id="totalProfessores">0</span>`
+const totalsDiv = createEl('div', { className: 'centered', id: 'totals', innerHTML:
+    `<span>Total de Alunos: <span id="totalAlunos">0</span> | Total de Professores: <span id="totalProfessores">0</span></span>`
 });
 
 const chartContainer = createEl('div', { id: 'chartContainer' });
@@ -155,24 +200,39 @@ const canvas = createEl('canvas', { id: 'humorChart' });
 chartContainer.appendChild(canvas);
 
 container.appendChild(h1);
+container.appendChild(todayLabel);
+container.appendChild(dateSelectLabel);
+container.appendChild(dateInput);
 container.appendChild(catCont);
 container.appendChild(emojisDiv);
-container.appendChild(btn);
+container.appendChild(btnDiv);
 container.appendChild(totalsDiv);
 container.appendChild(chartContainer);
 
 document.body.appendChild(container);
 
-// === JS FUNCIONALIDADE ===
+// ========== Lógica de armazenamento e votos por dia ==========
+function getStorageData() {
+    return JSON.parse(localStorage.getItem('humorDataV2')) || {};
+}
+function saveStorageData(data) {
+    localStorage.setItem('humorDataV2', JSON.stringify(data));
+}
+function getVotesForDate(dateString) {
+    const data = getStorageData();
+    if (!data[dateString]) {
+        data[dateString] = {
+            aluno: {1:0,2:0,3:0,4:0,5:0},
+            professor: {1:0,2:0,3:0,4:0,5:0}
+        }
+    }
+    return data[dateString];
+}
 
+// ========== Gráfico ==========
 let selectedHumor = null;
 const emojiEls = document.querySelectorAll('.emoji');
-const chartCtx = document.getElementById('humorChart').getContext('2d');
-
-let humorData = JSON.parse(localStorage.getItem('humorData')) || {
-    aluno: {1:0,2:0,3:0,4:0,5:0},
-    professor: {1:0,2:0,3:0,4:0,5:0}
-};
+const chartCtx = canvas.getContext('2d');
 
 const humorChart = new Chart(chartCtx, {
     type: 'bar',
@@ -180,13 +240,13 @@ const humorChart = new Chart(chartCtx, {
         labels: EMOJIS.map(e=>`${e.emoji} ${e.label}`),
         datasets: [{
             label: 'Aluno',
-            data: Object.values(humorData.aluno),
+            data: [0,0,0,0,0],
             backgroundColor: 'rgba(59, 130, 246, 0.6)',
             borderColor: 'rgba(59, 130, 246, 1)',
             borderWidth: 1
         }, {
             label: 'Professor',
-            data: Object.values(humorData.professor),
+            data: [0,0,0,0,0],
             backgroundColor: 'rgba(236, 72, 153, 0.6)',
             borderColor: 'rgba(236, 72, 153, 1)',
             borderWidth: 1
@@ -220,9 +280,11 @@ const humorChart = new Chart(chartCtx, {
                 font: { family: 'Poppins', weight: 'bold', size: 12 }
             }
         }
-    }
+    },
+    plugins: [ChartDataLabels]
 });
 
+// ========== Eventos ==========
 emojiEls.forEach(emoji => {
     emoji.addEventListener('click',function(){
         emojiEls.forEach(e=>e.classList.remove('selected'));
@@ -231,9 +293,18 @@ emojiEls.forEach(emoji => {
     });
 });
 
-function updateTotals() {
-    document.getElementById('totalAlunos').textContent = Object.values(humorData.aluno).reduce((a,b)=>a+b,0);
-    document.getElementById('totalProfessores').textContent = Object.values(humorData.professor).reduce((a,b)=>a+b,0);
+function updateChartAndTotals(dateString) {
+    const votes = getVotesForDate(dateString);
+    humorChart.data.datasets[0].data = Object.values(votes.aluno);
+    humorChart.data.datasets[1].data = Object.values(votes.professor);
+    humorChart.update();
+    document.getElementById('totalAlunos').textContent = Object.values(votes.aluno).reduce((a,b)=>a+b,0);
+    document.getElementById('totalProfessores').textContent = Object.values(votes.professor).reduce((a,b)=>a+b,0);
+}
+function onDateSelect() {
+    let val = dateInput.value || formatDate(today);
+    updateChartAndTotals(val);
+    document.getElementById('todayDateBR').textContent = formatDateBR(new Date(val));
 }
 
 function submitResponse() {
@@ -246,20 +317,21 @@ function submitResponse() {
         alert('Obrigatório selecionar como você está se sentindo antes de enviar.');
         return;
     }
-    humorData[category][selectedHumor]++;
-    localStorage.setItem('humorData', JSON.stringify(humorData));
-    updateChart();
-    updateTotals();
+    const todayString = formatDate(new Date());
+    const data = getStorageData();
+    const dayVotes = getVotesForDate(todayString);
+    dayVotes[category][selectedHumor]++;
+    data[todayString] = dayVotes;
+    saveStorageData(data);
+    updateChartAndTotals(todayString);
     alert('Vibes enviadas com sucesso! 🚀');
     emojiEls.forEach(e=>e.classList.remove('selected'));
     selectedHumor = null;
     document.getElementById('category').value = '';
+    // Atualiza a data exibida para hoje e seleciona hoje
+    dateInput.value = todayString;
+    document.getElementById('todayDateBR').textContent = formatDateBR(new Date(todayString));
 }
 
-function updateChart() {
-    humorChart.data.datasets[0].data = Object.values(humorData.aluno);
-    humorChart.data.datasets[1].data = Object.values(humorData.professor);
-    humorChart.update();
-}
-
-updateTotals();
+// ========== Inicialização ==========
+updateChartAndTotals(formatDate(today));
