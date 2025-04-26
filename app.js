@@ -91,22 +91,12 @@ injectStyles(`
         align-items:center;
         justify-content:center;
     }
-    .date-today-label, .data-select-label {
+    .date-today-label {
         font-size: 1.1rem;
         font-weight: 600;
         color: #1e3a8a;
-        margin-bottom: 0.3rem;
+        margin-bottom: 0.7rem;
         text-align: center;
-    }
-    input[type="date"] {
-        margin-bottom: 1rem;
-        font-size: 1rem;
-        padding: 0.4rem;
-        border-radius: 8px;
-        border: 2px solid #a855f7;
-        outline: none;
-        background: #f1f5f9;
-        box-sizing: border-box;
     }
     button {
         background: linear-gradient(90deg, #7c3aed, #a855f7);
@@ -145,17 +135,10 @@ const container = createEl('div', {className: 'container'});
 const h1 = createEl('h1', { innerHTML: 'Como você tá hoje? 😎' });
 
 const today = new Date();
-
 const todayLabel = createEl('div', {
     className: 'date-today-label',
     innerHTML: `Data de Hoje: <b id="todayDateBR">${formatDateBR(today)}</b>`
 });
-const dateSelectLabel = createEl('div', {
-    className: 'data-select-label',
-    innerHTML: "Selecionar Dia:"
-});
-const dateInput = createEl('input', {id:"selectDate", type:"date", value: formatDate(today), max: formatDate(today)});
-dateInput.addEventListener('change', onDateSelect);
 
 const catCont = createEl('div', { className: 'category-container' });
 const catLabel = createEl('label', { for: 'category', innerHTML: 'Você é:' });
@@ -201,8 +184,6 @@ chartContainer.appendChild(canvas);
 
 container.appendChild(h1);
 container.appendChild(todayLabel);
-container.appendChild(dateSelectLabel);
-container.appendChild(dateInput);
 container.appendChild(catCont);
 container.appendChild(emojisDiv);
 container.appendChild(btnDiv);
@@ -301,11 +282,6 @@ function updateChartAndTotals(dateString) {
     document.getElementById('totalAlunos').textContent = Object.values(votes.aluno).reduce((a,b)=>a+b,0);
     document.getElementById('totalProfessores').textContent = Object.values(votes.professor).reduce((a,b)=>a+b,0);
 }
-function onDateSelect() {
-    let val = dateInput.value || formatDate(today);
-    updateChartAndTotals(val);
-    document.getElementById('todayDateBR').textContent = formatDateBR(new Date(val));
-}
 
 function submitResponse() {
     const category = document.getElementById('category').value;
@@ -328,9 +304,6 @@ function submitResponse() {
     emojiEls.forEach(e=>e.classList.remove('selected'));
     selectedHumor = null;
     document.getElementById('category').value = '';
-    // Atualiza a data exibida para hoje e seleciona hoje
-    dateInput.value = todayString;
-    document.getElementById('todayDateBR').textContent = formatDateBR(new Date(todayString));
 }
 
 // ========== Inicialização ==========
