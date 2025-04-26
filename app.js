@@ -1,0 +1,265 @@
+// Função para criar e adicionar elementos
+function createEl(tag, options = {}) {
+    const el = document.createElement(tag);
+    if (options.className) el.className = options.className;
+    if (options.innerHTML) el.innerHTML = options.innerHTML;
+    if (options.type) el.type = options.type;
+    if (options.id) el.id = options.id;
+    if (options.value) el.value = options.value;
+    if (options.placeholder) el.placeholder = options.placeholder;
+    if (options.for) el.htmlFor = options.for;
+    if (options.src) el.src = options.src;
+    return el;
+}
+
+// Inserindo os estilos via JS
+function injectStyles(styleString) {
+    const style = document.createElement('style');
+    style.textContent = styleString;
+    document.head.appendChild(style);
+}
+
+injectStyles(`
+    * {
+        margin: 0; padding: 0; box-sizing: border-box;
+    }
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(135deg, #6b7280, #a855f7);
+        min-height: 100vh; display: flex; justify-content: center; align-items: center;
+        padding: 1rem; overflow-x: hidden;
+    }
+    .container {
+        max-width: 700px; width: 100%;
+        background: rgba(255,255,255,0.95); padding: 2rem; border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2); position: relative;
+        animation: fadeIn 0.5s ease-in-out;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px);} to { opacity: 1; transform: translateY(0);} }
+    h1 {
+        font-size: 2rem; color: #1e3a8a; margin-bottom: 1.5rem;
+        text-align:center; font-weight:700;
+    }
+    .category-container {
+        display:flex; flex-direction:column; align-items:center;
+        margin-bottom:1.5rem;
+    }
+    .category-container label {
+        font-size:1.1rem; color:#1e3a8a; margin-bottom:0.5rem;
+    }
+    select {
+        appearance:none; background:#f1f5f9;
+        border:2px solid #a855f7; border-radius:10px;
+        padding:0.75rem 1rem; font-size:1rem; width:200px; cursor:pointer;
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    select:focus {
+        outline:none; border-color:#7c3aed;
+        box-shadow:0 0 8px rgba(124,58,237,0.3);
+    }
+    .emojis {
+        display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;
+        margin:1.5rem 0;
+    }
+    .emoji-container {
+        display:flex; flex-direction:column; align-items:center; transition:transform 0.3s;
+    }
+    .emoji {
+        font-size:3rem; cursor:pointer; transition:transform 0.3s, box-shadow 0.3s;
+    }
+    .emoji:hover {
+        transform:scale(1.2) rotate(5deg);
+        box-shadow:0 5px 15px rgba(0,0,0,0.2);
+    }
+    .selected {
+        transform:scale(1.2); border:3px solid #7c3aed;
+        border-radius:15px; padding:0.5rem;
+    }
+    .emoji-label {
+        font-size:0.9rem; color:#1e3a8a; margin-top:0.5rem; font-weight:600;
+    }
+    button {
+        background: linear-gradient(90deg, #7c3aed, #a855f7);
+        color:white; border:none; padding:0.75rem 2rem; font-size:1.1rem;
+        font-weight:600; border-radius:50px; cursor:pointer;
+        transition:transform 0.3s, box-shadow 0.3s; margin:1rem 0;
+    }
+    button:hover {
+        transform:translateY(-3px);
+        box-shadow:0 5px 15px rgba(124,58,237,0.4);
+    }
+    #totals {
+        font-size:1.1rem; color:#1e3a8a; margin:1.5rem 0; font-weight:600;
+    }
+    #chartContainer {
+        height:350px; width:100%; margin-top:2rem;
+        background:#f1f5f9; border-radius:15px; padding:1rem;
+    }
+    @media (max-width:600px) {
+        h1 { font-size:1.5rem; }
+        .emoji { font-size:2.5rem; }
+        .emoji-label { font-size:0.8rem; }
+        select { width:100%; max-width:180px; }
+        button { padding:0.6rem 1.5rem; font-size:1rem; }
+        #chartContainer { height:300px; }
+    }
+    body::before {
+        content:''; position:fixed; top:0; left:0; width:100%; height:100%;
+        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><circle cx="50" cy="50" r="20" fill="rgba(255,255,255,0.1)"/><circle cx="150" cy="150" r="30" fill="rgba(255,255,255,0.1)"/><rect x="100" y="20" width="40" height="40" fill="rgba(255,255,255,0.1)" transform="rotate(45 120 40)"/></svg>') repeat;
+        z-index:-1; opacity:0.2;
+    }
+`);
+
+// Montar a estrutura visual
+const container = createEl('div', {className: 'container'});
+const h1 = createEl('h1', { innerHTML: 'Como você tá hoje? 😎' });
+
+const catCont = createEl('div', { className: 'category-container' });
+const catLabel = createEl('label', { for: 'category', innerHTML: 'Você é:' });
+const catSelect = createEl('select', { id: 'category' });
+catSelect.innerHTML = `<option value="" selected>Selecione</option>
+    <option value="aluno">Aluno</option>
+    <option value="professor">Professor</option>`;
+catCont.appendChild(catLabel);
+catCont.appendChild(catSelect);
+
+const emojisDiv = createEl('div', { className: 'emojis', id: 'emojis' });
+
+const EMOJIS = [
+    {val:'1', emoji:'😢', label:'Muito Triste'},
+    {val:'2', emoji:'😔', label:'Triste'},
+    {val:'3', emoji:'😐', label:'Neutro'},
+    {val:'4', emoji:'😊', label:'Feliz'},
+    {val:'5', emoji:'😄', label:'Muito Feliz'}
+];
+
+EMOJIS.forEach(({val, emoji, label}) => {
+    const emojiCont = createEl('div', { className: 'emoji-container'});
+    const emojiSpan = createEl('span', { className: 'emoji', innerHTML: emoji });
+    emojiSpan.setAttribute('data-value', val);
+    const emojiLabel = createEl('span', { className: 'emoji-label', innerHTML: label });
+    emojiCont.appendChild(emojiSpan);
+    emojiCont.appendChild(emojiLabel);
+    emojisDiv.appendChild(emojiCont);
+});
+
+const btn = createEl('button', { innerHTML: 'Enviar Vibes!'});
+btn.onclick = submitResponse;
+
+const totalsDiv = createEl('div', { id: 'totals', innerHTML: `
+    Total de Alunos: <span id="totalAlunos">0</span> | Total de Professores: <span id="totalProfessores">0</span>`
+});
+
+const chartContainer = createEl('div', { id: 'chartContainer' });
+const canvas = createEl('canvas', { id: 'humorChart' });
+chartContainer.appendChild(canvas);
+
+container.appendChild(h1);
+container.appendChild(catCont);
+container.appendChild(emojisDiv);
+container.appendChild(btn);
+container.appendChild(totalsDiv);
+container.appendChild(chartContainer);
+
+document.body.appendChild(container);
+
+// === JS FUNCIONALIDADE ===
+
+let selectedHumor = null;
+const emojiEls = document.querySelectorAll('.emoji');
+const chartCtx = document.getElementById('humorChart').getContext('2d');
+
+let humorData = JSON.parse(localStorage.getItem('humorData')) || {
+    aluno: {1:0,2:0,3:0,4:0,5:0},
+    professor: {1:0,2:0,3:0,4:0,5:0}
+};
+
+const humorChart = new Chart(chartCtx, {
+    type: 'bar',
+    data: {
+        labels: EMOJIS.map(e=>`${e.emoji} ${e.label}`),
+        datasets: [{
+            label: 'Aluno',
+            data: Object.values(humorData.aluno),
+            backgroundColor: 'rgba(59, 130, 246, 0.6)',
+            borderColor: 'rgba(59, 130, 246, 1)',
+            borderWidth: 1
+        }, {
+            label: 'Professor',
+            data: Object.values(humorData.professor),
+            backgroundColor: 'rgba(236, 72, 153, 0.6)',
+            borderColor: 'rgba(236, 72, 153, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true,
+                title: { display: true, text: 'Número de Respostas', font: { family: 'Poppins', size: 14 } },
+                grid: { color: 'rgba(0, 0, 0, 0.1)' }
+            },
+            x: {
+                title: { display: true, text: 'Humor', font: { family: 'Poppins', size: 14 } },
+                grid: { display: false }
+            }
+        },
+        plugins: {
+            title: {
+                display: true,
+                text: 'Vibes do Dia',
+                font: { family: 'Poppins', size: 20, weight: 'bold' },
+                color: '#1e3a8a'
+            },
+            datalabels: {
+                anchor: 'end',
+                align: 'top',
+                formatter: (value) => value > 0 ? value : '',
+                font: { family: 'Poppins', weight: 'bold', size: 12 }
+            }
+        }
+    }
+});
+
+emojiEls.forEach(emoji => {
+    emoji.addEventListener('click',function(){
+        emojiEls.forEach(e=>e.classList.remove('selected'));
+        this.classList.add('selected');
+        selectedHumor = this.getAttribute('data-value');
+    });
+});
+
+function updateTotals() {
+    document.getElementById('totalAlunos').textContent = Object.values(humorData.aluno).reduce((a,b)=>a+b,0);
+    document.getElementById('totalProfessores').textContent = Object.values(humorData.professor).reduce((a,b)=>a+b,0);
+}
+
+function submitResponse() {
+    const category = document.getElementById('category').value;
+    if(category===''){
+        alert('Obrigatório selecionar se você é Aluno ou Professor antes de enviar.');
+        return;
+    }
+    if(selectedHumor===null){
+        alert('Obrigatório selecionar como você está se sentindo antes de enviar.');
+        return;
+    }
+    humorData[category][selectedHumor]++;
+    localStorage.setItem('humorData', JSON.stringify(humorData));
+    updateChart();
+    updateTotals();
+    alert('Vibes enviadas com sucesso! 🚀');
+    emojiEls.forEach(e=>e.classList.remove('selected'));
+    selectedHumor = null;
+    document.getElementById('category').value = '';
+}
+
+function updateChart() {
+    humorChart.data.datasets[0].data = Object.values(humorData.aluno);
+    humorChart.data.datasets[1].data = Object.values(humorData.professor);
+    humorChart.update();
+}
+
+updateTotals();
