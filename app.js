@@ -1,4 +1,4 @@
-// Funções utilitárias para elementos e datas
+// Utilidades básicas
 function createEl(tag, options = {}) {
     const el = document.createElement(tag);
     if (options.className) el.className = options.className;
@@ -19,105 +19,40 @@ function injectStyles(styleString) {
     document.head.appendChild(style);
 }
 function formatDate(date) {
-    return date.toISOString().slice(0, 10);  // aaaa-mm-dd
+    return date.toISOString().slice(0, 10);
 }
 function formatDateBR(date) {
-    return date.toLocaleDateString('pt-BR'); // dd/mm/aaaa
+    return date.toLocaleDateString('pt-BR');
 }
 
-// ========== CSS ==========
+// INJETAR CSS
 injectStyles(`
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-        font-family: 'Poppins', sans-serif;
-        background: linear-gradient(135deg, #6b7280, #a855f7);
-        min-height: 100vh;
-        display: flex; justify-content: center; align-items: center;
-        padding: 1rem; overflow-x: hidden;
-    }
-    .container {
-        max-width: 700px; width: 100%;
-        background: rgba(255,255,255,0.95);
-        padding: 2rem; border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        position: relative; animation: fadeIn 0.5s ease-in-out;
-    }
-    @keyframes fadeIn { from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);} }
-    h1 { font-size: 2rem; color: #1e3a8a; margin-bottom: 1.0rem; text-align: center; font-weight: 700; }
-    .category-container {
-        display:flex; flex-direction:column; align-items:center;
-        margin-bottom:1.5rem;
-    }
-    .category-container label {
-        font-size:1.1rem; color:#1e3a8a; margin-bottom:0.5rem;
-    }
-    select {
-        appearance:none; background:#f1f5f9;
-        border:2px solid #a855f7; border-radius:10px;
-        padding:0.75rem 1rem; font-size:1rem; width:200px; cursor:pointer;
-        transition: border-color 0.3s, box-shadow 0.3s;
-    }
-    select:focus {
-        outline:none; border-color:#7c3aed;
-        box-shadow:0 0 8px rgba(124,58,237,0.3);
-    }
-    .emojis {
-        display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;
-        margin:1.5rem 0;
-    }
-    .emoji-container {
-        display:flex; flex-direction:column; align-items:center; transition:transform 0.3s;
-    }
-    .emoji {
-        font-size:3rem; cursor:pointer; transition:transform 0.3s, box-shadow 0.3s;
-    }
-    .emoji:hover {
-        transform:scale(1.2) rotate(5deg);
-        box-shadow:0 5px 15px rgba(0,0,0,0.2);
-    }
-    .selected {
-        transform:scale(1.2); border:3px solid #7c3aed;
-        border-radius:15px; padding:0.5rem;
-    }
-    .emoji-label {
-        font-size:0.9rem; color:#1e3a8a; margin-top:0.5rem; font-weight:600;
-    }
-    .centered {
-        display:flex;
-        flex-direction:column;
-        align-items:center;
-        justify-content:center;
-    }
-    .date-today-label {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #1e3a8a;
-        margin-bottom: 0.7rem;
-        text-align: center;
-    }
-    button {
-        background: linear-gradient(90deg, #7c3aed, #a855f7);
-        color:white; border:none; padding:0.75rem 2rem; font-size:1.1rem;
-        font-weight:600; border-radius:50px; cursor:pointer;
-        transition:transform 0.3s, box-shadow 0.3s; margin:1rem 0;
-    }
-    button:hover {
-        transform:translateY(-3px);
-        box-shadow:0 5px 15px rgba(124,58,237,0.4);
-    }
-    #totals {
-        font-size:1.1rem; color:#1e3a8a; margin:1.0rem 0 1.5rem 0; font-weight:600;
-    }
-    #chartContainer {
-        height:350px; width:100%; margin-top:2rem;
-        background:#f1f5f9; border-radius:15px; padding:1rem;
-    }
-    #exportBtn {
-        display:none;
-        background:#16a34a!important;
-        color:#fff;
-        font-weight:700;
-    }
+    * { margin:0; padding:0; box-sizing: border-box; }
+    body { font-family:'Poppins',sans-serif; background: linear-gradient(135deg, #6b7280, #a855f7); min-height:100vh;
+        display:flex; justify-content:center; align-items:center; padding:1rem; overflow-x:hidden; }
+    .container { max-width:700px; width:100%; background:rgba(255,255,255,0.97); padding:2rem; border-radius:20px;
+        box-shadow:0 10px 30px rgba(0,0,0,0.15); position:relative; animation:fadeIn 0.5s; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
+    h1 { font-size:2rem; color:#1e3a8a; margin-bottom:1rem; text-align:center; }
+    .category-container { display:flex; flex-direction:column; align-items:center; margin-bottom:1.5rem; }
+    .category-container label { font-size:1.1rem; color:#1e3a8a; margin-bottom:0.5rem; }
+    select { appearance:none; background:#f1f5f9; border:2px solid #a855f7; border-radius:10px;
+        padding:0.75rem 1rem; font-size:1rem; width:200px; cursor:pointer; }
+    select:focus { outline:none; border-color:#7c3aed; box-shadow:0 0 8px rgba(124,58,237,0.3); }
+    .emojis { display:flex; justify-content: center; gap:1rem; flex-wrap:wrap; margin:1.5rem 0; }
+    .emoji-container { display:flex; flex-direction:column; align-items:center; transition:transform 0.3s; }
+    .emoji { font-size:3rem; cursor:pointer; transition:transform 0.3s, box-shadow 0.3s; }
+    .emoji:hover { transform:scale(1.2) rotate(5deg); box-shadow:0 5px 15px rgba(0,0,0,0.10); }
+    .selected { transform:scale(1.2); border:3px solid #7c3aed; border-radius:15px; padding:0.5rem; }
+    .emoji-label { font-size:0.9rem; color:#1e3a8a; margin-top:0.5rem; font-weight:600; }
+    .centered { display:flex; flex-direction:column; align-items:center; justify-content:center; }
+    .date-today-label { font-size:1.1rem; font-weight:600; color:#1e3a8a; margin-bottom:0.7rem; text-align:center; }
+    button { background: linear-gradient(90deg,#7c3aed,#a855f7); color:white; border:none; padding:0.75rem 2rem; font-size:1.1rem;
+        font-weight:600; border-radius:50px; cursor:pointer; transition:transform 0.3s, box-shadow 0.3s; margin:1rem 0; }
+    button:hover { transform:translateY(-3px); box-shadow:0 5px 15px rgba(124,58,237,0.3); }
+    #totals { font-size:1.1rem; color:#1e3a8a; margin:1.0rem 0 1.5rem 0; font-weight:600; }
+    #chartContainer { height:350px; width:100%; margin-top:2rem; background:#f1f5f9; border-radius:15px; padding:1rem; }
+    #exportBtn { display:none; background:#16a34a!important; color:#fff; font-weight:700; }
     @media (max-width:600px) {
         h1 { font-size:1.5rem; }
         .emoji { font-size:2.5rem; }
@@ -126,34 +61,25 @@ injectStyles(`
         button { padding:0.6rem 1.5rem; font-size:1rem; }
         #chartContainer { height:300px; }
     }
-    body::before {
-        content:''; position:fixed; top:0; left:0; width:100%; height:100%;
-        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><circle cx="50" cy="50" r="20" fill="rgba(255,255,255,0.1)"/><circle cx="150" cy="150" r="30" fill="rgba(255,255,255,0.1)"/><rect x="100" y="20" width="40" height="40" fill="rgba(255,255,255,0.1)" transform="rotate(45 120 40)"/></svg>') repeat;
-        z-index:-1; opacity:0.2;
-    }
 `);
 
-// ========== Estrutura visual ==========
-
-const container = createEl('div', {className: 'container'});
+// ESTRUTURA
+const container = createEl('div', {className:'container'});
 const h1 = createEl('h1', { innerHTML: 'Como você tá hoje? 😎' });
 
 const today = new Date();
-const todayLabel = createEl('div', {
-    className: 'date-today-label',
-    innerHTML: `Data de Hoje: <b id="todayDateBR">${formatDateBR(today)}</b>`
-});
+const todayLabel = createEl('div', { className: 'date-today-label', innerHTML: `Data de Hoje: <b id="todayDateBR">${formatDateBR(today)}</b>` });
 
-const catCont = createEl('div', { className: 'category-container' });
-const catLabel = createEl('label', { for: 'category', innerHTML: 'Você é:' });
-const catSelect = createEl('select', { id: 'category' });
+const catCont = createEl('div', { className:'category-container' });
+const catLabel = createEl('label', { for:'category', innerHTML:'Você é:' });
+const catSelect = createEl('select', { id:'category' });
 catSelect.innerHTML = `<option value="" selected>Selecione</option>
     <option value="aluno">Aluno</option>
     <option value="professor">Professor</option>`;
 catCont.appendChild(catLabel);
 catCont.appendChild(catSelect);
 
-const emojisDiv = createEl('div', { className: 'emojis', id: 'emojis' });
+const emojisDiv = createEl('div', { className:'emojis', id:'emojis' });
 
 const EMOJIS = [
     {val:'1', emoji:'😢', label:'Muito Triste'},
@@ -164,26 +90,26 @@ const EMOJIS = [
 ];
 
 EMOJIS.forEach(({val, emoji, label}) => {
-    const emojiCont = createEl('div', { className: 'emoji-container'});
-    const emojiSpan = createEl('span', { className: 'emoji', innerHTML: emoji });
+    const emojiCont = createEl('div', { className:'emoji-container'});
+    const emojiSpan = createEl('span', { className:'emoji', innerHTML:emoji });
     emojiSpan.setAttribute('data-value', val);
-    const emojiLabel = createEl('span', { className: 'emoji-label', innerHTML: label });
+    const emojiLabel = createEl('span', { className:'emoji-label', innerHTML:label });
     emojiCont.appendChild(emojiSpan);
     emojiCont.appendChild(emojiLabel);
     emojisDiv.appendChild(emojiCont);
 });
 
-const btnDiv = createEl('div', {className: 'centered'});
-const btn = createEl('button', { innerHTML: 'Enviar Vibes!'});
+const btnDiv = createEl('div', {className:'centered'});
+const btn = createEl('button', { innerHTML: 'Enviar Vibes!' });
 btn.onclick = submitResponse;
 btnDiv.appendChild(btn);
 
-const totalsDiv = createEl('div', { className: 'centered', id: 'totals', innerHTML:
-    `<span>Total de Alunos: <span id="totalAlunos">0</span> | Total de Professores: <span id="totalProfessores">0</span></span>`
-});
+const totalsDiv = createEl('div', { className:'centered', id:'totals', innerHTML:`
+    <span>Total de Alunos: <span id="totalAlunos">0</span> | Total de Professores: <span id="totalProfessores">0</span></span>
+` });
 
-const chartContainer = createEl('div', { id: 'chartContainer' });
-const canvas = createEl('canvas', { id: 'humorChart' });
+const chartContainer = createEl('div', { id:'chartContainer' });
+const canvas = createEl('canvas', { id:'humorChart' });
 chartContainer.appendChild(canvas);
 
 container.appendChild(h1);
@@ -196,7 +122,7 @@ container.appendChild(chartContainer);
 
 document.body.appendChild(container);
 
-// ========== Lógica de armazenamento e votos por dia ==========
+// ARMAZENAMENTO
 function getStorageData() {
     return JSON.parse(localStorage.getItem('humorDataV2')) || {};
 }
@@ -214,28 +140,30 @@ function getVotesForDate(dateString) {
     return data[dateString];
 }
 
-// ========== Gráfico ==========
+// GRÁFICO
 let selectedHumor = null;
 const emojiEls = document.querySelectorAll('.emoji');
 const chartCtx = canvas.getContext('2d');
-
 const humorChart = new Chart(chartCtx, {
     type: 'bar',
     data: {
-        labels: EMOJIS.map(e=>`${e.emoji} ${e.label}`),
-        datasets: [{
-            label: 'Aluno',
-            data: [0,0,0,0,0],
-            backgroundColor: 'rgba(59, 130, 246, 0.6)',
-            borderColor: 'rgba(59, 130, 246, 1)',
-            borderWidth: 1
-        }, {
-            label: 'Professor',
-            data: [0,0,0,0,0],
-            backgroundColor: 'rgba(236, 72, 153, 0.6)',
-            borderColor: 'rgba(236, 72, 153, 1)',
-            borderWidth: 1
-        }]
+        labels: EMOJIS.map(e => `${e.emoji} ${e.label}`),
+        datasets: [
+            {
+                label: 'Aluno',
+                data: [0,0,0,0,0],
+                backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                borderColor: 'rgba(59, 130, 246, 1)',
+                borderWidth: 1
+            },
+            {
+                label: 'Professor',
+                data: [0,0,0,0,0],
+                backgroundColor: 'rgba(236, 72, 153, 0.6)',
+                borderColor: 'rgba(236, 72, 153, 1)',
+                borderWidth: 1
+            }
+        ]
     },
     options: {
         responsive: true,
@@ -261,7 +189,7 @@ const humorChart = new Chart(chartCtx, {
             datalabels: {
                 anchor: 'end',
                 align: 'top',
-                formatter: (value) => value > 0 ? value : '',
+                formatter: value => value > 0 ? value : '',
                 font: { family: 'Poppins', weight: 'bold', size: 12 }
             }
         }
@@ -269,15 +197,14 @@ const humorChart = new Chart(chartCtx, {
     plugins: [ChartDataLabels]
 });
 
-// ========== Eventos ==========
+// EVENTOS
 emojiEls.forEach(emoji => {
-    emoji.addEventListener('click',function(){
-        emojiEls.forEach(e=>e.classList.remove('selected'));
+    emoji.addEventListener('click', function() {
+        emojiEls.forEach(e => e.classList.remove('selected'));
         this.classList.add('selected');
         selectedHumor = this.getAttribute('data-value');
     });
 });
-
 function updateChartAndTotals(dateString) {
     const votes = getVotesForDate(dateString);
     humorChart.data.datasets[0].data = Object.values(votes.aluno);
