@@ -312,11 +312,7 @@ function submitResponse() {
     document.getElementById('category').value = '';
 }
 
-// ============= BOTÃO EXPORTAÇÃO SECRETO/CÓDIGO =============
-
-// Mude aqui o código secreto (ex: feira2024). O botão Exportar só aparece se você digitar essa sequência na página:
-const SECRET_EXPORT_CODE = "ds";
-let secretBuffer = "";
+// ============= BOTÃO EXPORTAÇÃO: atalho Ctrl + D + S =============
 
 const exportBtn = createEl('button', {
     id: "exportBtn",
@@ -326,17 +322,23 @@ const exportBtn = createEl('button', {
 exportBtn.onclick = exportVotesFunc;
 container.appendChild(exportBtn);
 
-// Escuta teclas pressionadas para liberar o botão
+let ctrlDown = false;
+let dPressed = false;
 window.addEventListener('keydown', function(e){
-    // se for campo de texto, não pegar (opcional)
-    if(document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA") return;
-    // Acumula até o tamanho do segredo
-    secretBuffer = (secretBuffer + e.key).slice(-SECRET_EXPORT_CODE.length);
-    if(secretBuffer.toLowerCase() === SECRET_EXPORT_CODE.toLowerCase()){
+    if(e.key === "Control") ctrlDown = true;
+    if(ctrlDown && e.key.toLowerCase() === 'd') {
+        dPressed = true;
+    }
+    if(ctrlDown && dPressed && e.key.toLowerCase() === 's') {
         exportBtn.style.display = "block";
         alert("Botão de exportação habilitado!");
-        secretBuffer = ""; // limpa o buffer para evitar habilitar várias vezes
+        ctrlDown = false;
+        dPressed = false;
     }
+});
+window.addEventListener('keyup', function(e){
+    if(e.key === "Control") ctrlDown = false;
+    if(e.key.toLowerCase() === 'd') dPressed = false;
 });
 
 function exportVotesFunc(){
@@ -362,7 +364,7 @@ function exportVotesFunc(){
 // ============ AVISO AO SAIR ==============
 window.addEventListener('beforeunload', function (e) {
     e.preventDefault();
-    e.returnValue = 'Tem certeza que deseja sair? Caso não tenha exportado os votos, poderá perder os registros deste computador!';
+    e.returnValue = ''; // O aviso exibido será o padrão do navegador.
 });
 
 // ========== Inicialização ==========
