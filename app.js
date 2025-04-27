@@ -315,7 +315,7 @@ function submitResponse() {
 // ============= BOTÃO EXPORTAÇÃO SECRETO/CÓDIGO =============
 
 // Mude aqui o código secreto (ex: feira2024). O botão Exportar só aparece se você digitar essa sequência na página:
-const SECRET_EXPORT_CODE = "feira2024";
+const SECRET_EXPORT_CODE = "ds";
 let secretBuffer = "";
 
 const exportBtn = createEl('button', {
