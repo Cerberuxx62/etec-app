@@ -10,6 +10,7 @@ function createEl(tag, options = {}) {
     if (options.for) el.htmlFor = options.for;
     if (options.src) el.src = options.src;
     if (options.max) el.max = options.max;
+    if (options.style) el.style = options.style;
     return el;
 }
 
@@ -20,12 +21,10 @@ function injectStyles(styleString) {
 }
 
 function formatDate(date) {
-    // aaaa-mm-dd
-    return date.toISOString().slice(0, 10);
+    return date.toISOString().slice(0, 10);  // aaaa-mm-dd
 }
 function formatDateBR(date) {
-    // dd/mm/aaaa
-    return date.toLocaleDateString('pt-BR');
+    return date.toLocaleDateString('pt-BR'); // dd/mm/aaaa
 }
 
 // ========== CSS ==========
@@ -114,6 +113,12 @@ injectStyles(`
     #chartContainer {
         height:350px; width:100%; margin-top:2rem;
         background:#f1f5f9; border-radius:15px; padding:1rem;
+    }
+    #exportBtn {
+        display:none;
+        background:#16a34a!important;
+        color:#fff;
+        font-weight:700;
     }
     @media (max-width:600px) {
         h1 { font-size:1.5rem; }
@@ -266,6 +271,7 @@ const humorChart = new Chart(chartCtx, {
 });
 
 // ========== Eventos ==========
+
 emojiEls.forEach(emoji => {
     emoji.addEventListener('click',function(){
         emojiEls.forEach(e=>e.classList.remove('selected'));
@@ -305,6 +311,59 @@ function submitResponse() {
     selectedHumor = null;
     document.getElementById('category').value = '';
 }
+
+// ============= BOTÃO EXPORTAÇÃO SECRETO/CÓDIGO =============
+
+// Mude aqui o código secreto (ex: feira2024). O botão Exportar só aparece se você digitar essa sequência na página:
+const SECRET_EXPORT_CODE = "feira2024";
+let secretBuffer = "";
+
+const exportBtn = createEl('button', {
+    id: "exportBtn",
+    innerHTML: 'Exportar Votos',
+    style: "display:none;background:#16a34a!important;margin: 1rem;"
+});
+exportBtn.onclick = exportVotesFunc;
+container.appendChild(exportBtn);
+
+// Escuta teclas pressionadas para liberar o botão
+window.addEventListener('keydown', function(e){
+    // se for campo de texto, não pegar (opcional)
+    if(document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA") return;
+    // Acumula até o tamanho do segredo
+    secretBuffer = (secretBuffer + e.key).slice(-SECRET_EXPORT_CODE.length);
+    if(secretBuffer.toLowerCase() === SECRET_EXPORT_CODE.toLowerCase()){
+        exportBtn.style.display = "block";
+        alert("Botão de exportação habilitado!");
+        secretBuffer = ""; // limpa o buffer para evitar habilitar várias vezes
+    }
+});
+
+function exportVotesFunc(){
+    const data = getStorageData();
+    const csvRows = [
+        "Data,Tipo,Emoji,Votos"
+    ];
+    for(const dia in data){
+        for(const tipo in data[dia]){
+            for(const valor in data[dia][tipo]){
+                csvRows.push(`${dia},${tipo},${valor},${data[dia][tipo][valor]}`);
+            }
+        }
+    }
+    // Baixando como CSV
+    const blob = new Blob([csvRows.join("\n")],{type:"text/csv"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "votos_feira.csv";
+    a.click();
+}
+
+// ============ AVISO AO SAIR ==============
+window.addEventListener('beforeunload', function (e) {
+    e.preventDefault();
+    e.returnValue = 'Tem certeza que deseja sair? Caso não tenha exportado os votos, poderá perder os registros deste computador!';
+});
 
 // ========== Inicialização ==========
 updateChartAndTotals(formatDate(today));
